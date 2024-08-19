@@ -16,7 +16,7 @@ class SubjectDataProcessor:
                         combined_data = {}
 
                         # Iterate over each CSV file type (e.g., ACC.csv, BVP.csv)
-                        csv_files = ['ACC.csv', 'BVP.csv', 'EDA.csv', 'HR.csv', 'IBI.csv', 'TEMP.csv']
+                        csv_files = ['ACC.csv', 'BVP.csv', 'EDA.csv', 'HR.csv', 'TEMP.csv']
                         for csv_file in csv_files:
                             # Load data from both subfolders
                             recording1 = pd.read_csv(subfolders[0] / csv_file, header=None)
@@ -80,40 +80,45 @@ class SubjectDataProcessor:
         return filled_recording
 
     def generate_dummy_rows(self, no_rows, original_data):
-        # Create a DataFrame with the same columns as the original data and no_rows filled with NaN
-        missing_values = pd.DataFrame(pd.NA, index=range(no_rows), columns=original_data.columns)
-        
-        # Convert all columns to float64 to match the original data types
-        missing_values = missing_values.astype('float64')
-        
+        # Create a DataFrame with the same columns as the original data and no_rows filled with a large number
+        placeholder = 9999999999  # A large number unlikely to appear in real data
+        missing_values = pd.DataFrame(placeholder, index=range(no_rows), columns=original_data.columns)
+    
         # Debug: Check the data types of missing_values
-        print("Data types of missing_values after conversion:", missing_values.dtypes)
-        
+        # print("Data types of missing_values after filling with placeholder:", missing_values.dtypes)
+    
         return missing_values
 
 
     def fill_in_missing_values(self, recording1, recording2, missing_values):
         # Delete the first two rows of recording2
         recording2 = recording2.iloc[2:].reset_index(drop=True)
-
-        # Debug: Ensure data types are consistent before concatenation
-        print("Data types of recording1 before concatenation:", recording1.dtypes)
-        print("Data types of recording2 before concatenation:", recording2.dtypes)
         
         # Concatenate recording1, missing_values, and recording2
         filled_recording = pd.concat([recording1, missing_values, recording2], ignore_index=True)
 
-        # Debug: Check the data types after concatenation
-        print("Data types after concatenation:", filled_recording.dtypes)
+        def replace_placeholder(col, placeholder=9999999999):
 
-        # Fill the NaN values in the dummy rows with the mean of each column
-        filled_recording = filled_recording.apply(lambda col: col.fillna(col.mean()), axis=0)
+            # Exclude the first two rows and any placeholders for the mean calculation
+            excl_col = col.iloc[2:]  # Exclude the first two rows
+            excl_col = excl_col[excl_col != placeholder]  # Exclude the placeholder values
+
+            # Calculate the mean of the filtered values
+            col_mean = round(excl_col.mean(), 1)
+            print(f"Mean value to replace placeholder in {col.name}: {col_mean}")
+            
+            # Replace the placeholder values with the mean
+            col = col.replace(placeholder, col_mean)
+        
+            return col
+
+        filled_recording = filled_recording.apply(replace_placeholder, axis=0)
 
         return filled_recording
 
     def save_in_new_csv_file(self, filled_recording, output_filepath):
-        filled_recording.to_csv(output_filepath, index=False)
-
+        # Skip the first row and save the rest of the DataFrame
+        filled_recording.to_csv(output_filepath, index=False, header=False)
 
 def run_subject_data_processor(base_folder):
     """
