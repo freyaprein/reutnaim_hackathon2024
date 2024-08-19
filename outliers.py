@@ -43,7 +43,10 @@ def winsorize_data(df, threshold=2.5):
     return df
 
 def save_sd_file(df, sd_file_path, threshold=2.5):
-    # Calculate the mean and standard deviation for each column
+    # Remove the first column (timestamp)
+    df = df.iloc[:, 1:]
+    
+    # Calculate the mean and standard deviation for each remaining column
     means = df.mean()
     std_devs = df.std()
     
@@ -63,8 +66,8 @@ def save_sd_file(df, sd_file_path, threshold=2.5):
     print(f"SD file saved as {sd_file_path}")
 
 def process_individual_recordings(individual_recordings_path):
-    # List of specific CSV files to process
-    csv_files = ['ACC.csv', 'BVP.csv', 'EDA.csv', 'HR.csv', 'TEMP.csv']
+    # List of keywords to look for in the filenames
+    keywords = ['ACC', 'BVP', 'EDA', 'HR', 'TEMP']
     
     # Additional files to copy
     additional_files = ['info.txt', 'tags.csv']
@@ -83,13 +86,12 @@ def process_individual_recordings(individual_recordings_path):
             clean_participant_folder = clean_recordings_path / f"c_{participant_folder.name}"
             clean_participant_folder.mkdir(exist_ok=True)
             
-            for file_name in csv_files:
-                file_path = participant_folder / file_name
+            # Iterate over files in the participant folder
+            for file_path in participant_folder.glob('*.csv'):
+                file_name = file_path.name
                 
-                # Debugging: Print the path being checked
-                print(f"Checking path: {file_path}")
-                
-                if file_path.exists():
+                # Check if the filename contains any of the keywords
+                if any(keyword in file_name for keyword in keywords):
                     print(f"Processing file: {file_name} for participant: {participant_folder.name}")
                     df = pd.read_csv(file_path)
                     
@@ -121,8 +123,6 @@ def process_individual_recordings(individual_recordings_path):
                         save_sd_file(df, sd_file_path)
                     else:
                         print(f"File {file_name} for participant {participant_folder.name} has been excluded due to high outlier count.")
-                else:
-                    print(f"File not found: {file_name} in participant folder: {participant_folder.name}")
             
             # Copy additional files (info.txt, tags.csv) to the clean folder
             for additional_file in additional_files:
