@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import os
 
 def read_and_prepare_dataframe(file_path):
     """
@@ -63,36 +62,42 @@ def apply_winsorization(df, threshold=2.5):
     df_winsorized = df.clip(lower=lower_limit, upper=upper_limit, axis=1)
     return df_winsorized
 
-def process_files(file_paths, output_dir):
+def process_files(base_folder, file_names, output_dir):
     """
     Processes a list of CSV files by reading, filtering outliers, applying Winsorization, and saving cleaned data.
 
     Parameters:
-    file_paths (list of str): List of file paths to the CSV files to be processed.
+    base_folder (str): The base folder where the CSV files are located.
+    file_names (list of str): List of file names to be processed.
     output_dir (str): Directory where the processed CSV files will be saved.
 
     Returns:
     None
     """
-    for file_path in file_paths:
+    if not output_dir.endswith('/'):
+        output_dir += '/'
+
+    if not base_folder.endswith('/'):
+        base_folder += '/'
+
+    for file_name in file_names:
+        file_path = base_folder + file_name
         df, timestamps = read_and_prepare_dataframe(file_path)
         df_filtered = filter_participants_by_outliers(df)
         df_winsorized = apply_winsorization(df_filtered)
         df_winsorized.insert(0, 'Timestamp', timestamps)
-        file_name = os.path.basename(file_path)
-        output_path = os.path.join(output_dir, f"cleaned_{file_name}")
+        output_path = output_dir + "cleaned_" + file_name
         df_winsorized.to_csv(output_path, index=False)
 
-file_paths = [
-    '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024/bvp_concatenated.csv',
-    '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024/acc_concatenated.csv',
-    '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024/eda_concatenated.csv',
-    '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024/hr_concatenated.csv',
-    '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024/ibi_concatenated.csv'
+base_folder = '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024'
+file_names = [
+    'bvp_concatenated.csv',
+    'acc_concatenated.csv',
+    'eda_concatenated.csv',
+    'hr_concatenated.csv',
+    'ibi_concatenated.csv'
 ]
 
-output_dir = '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024/cleaned_files'
+output_dir = base_folder + '/cleaned_files'
 
-os.makedirs(output_dir, exist_ok=True)
-
-process_files(file_paths, output_dir)
+process_files(base_folder, file_names, output_dir)
