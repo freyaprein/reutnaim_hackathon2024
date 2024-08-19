@@ -1,103 +1,135 @@
 import pandas as pd
-import numpy as np
+from pathlib import Path
+import shutil
 
-def read_and_prepare_dataframe(file_path):
-    """
-    Reads a CSV file into a DataFrame, removes the timestamp column, and converts data to numeric format.
-
-    Parameters:
-    file_path (str): The path to the CSV file.
-
-    Returns:
-    pd.DataFrame: DataFrame with the timestamp column removed and participant data.
-    pd.Series: Series containing the timestamp data.
-    """
-    df = pd.read_csv(file_path, header=0, low_memory=False)
-    timestamps = df.iloc[:, 0]
-    participant_ids = df.columns[1:]
-    df = df.iloc[:, 1:]
-    df.columns = participant_ids
-    df = df.apply(pd.to_numeric, errors='coerce')
-    df = df.dropna(axis=1, how='all')
-    data_type = df.dtypes.unique()
-    print(f"Data types in {file_path}: {data_type}")
-    return df, timestamps
-
-def filter_participants_by_outliers(df, threshold=2.5):
-    """
-    Filters out participants who have more than 10% of their data identified as outliers.
-
-    Parameters:
-    df (pd.DataFrame): The DataFrame containing participant data.
-    threshold (float): The threshold in standard deviations for identifying outliers.
-
-    Returns:
-    pd.DataFrame: DataFrame with participants with excessive outliers removed.
-    """
+def filter_out_csv(df, threshold=2.5):
+    # Calculate the mean and standard deviation for each column
     means = df.mean()
-    stds = df.std()
-    upper_limit = means + threshold * stds
-    lower_limit = means - threshold * stds
-    is_outlier = (df > upper_limit) | (df < lower_limit)
-    outlier_percentage = is_outlier.mean() * 100
-    participants_to_exclude = outlier_percentage[outlier_percentage > 10].index
-    df_filtered = df.drop(columns=participants_to_exclude)
-    return df_filtered
+    std_devs = df.std()
+    
+    # Calculate the upper and lower bounds based on the threshold
+    upper_bounds = means + threshold * std_devs
+    lower_bounds = means - threshold * std_devs
+    
+    # Determine the proportion of data points that are outliers
+    outliers = ((df > upper_bounds) | (df < lower_bounds)).sum()
+    total_data_points = len(df)
+    
+    # Calculate the percentage of outliers
+    percentage_outliers = (outliers / total_data_points) * 100
+    
+    # Debugging: Print out the calculated values
+    print(f"Percentage of outliers: {percentage_outliers.mean()}%")
+    
+    # Check if more than 10% of the data points are outliers
+    if percentage_outliers.mean() > 10:
+        print("More than 10% of data points are outliers. Excluding the CSV file.")
+        return False  # Exclude this CSV file
+    else:
+        return True  # Include this CSV file
 
-def apply_winsorization(df, threshold=2.5):
-    """
-    Applies Winsorization to the DataFrame, limiting extreme values to a specified threshold.
-
-    Parameters:
-    df (pd.DataFrame): The DataFrame containing participant data.
-    threshold (float): The threshold in standard deviations for Winsorization.
-
-    Returns:
-    pd.DataFrame: DataFrame with extreme values limited according to the Winsorization threshold.
-    """
+def winsorize_data(df, threshold=2.5):
+    # Calculate the mean and standard deviation for each column
     means = df.mean()
-    stds = df.std()
-    upper_limit = means + threshold * stds
-    lower_limit = means - threshold * stds
-    df_winsorized = df.clip(lower=lower_limit, upper=upper_limit, axis=1)
-    return df_winsorized
+    std_devs = df.std()
+    
+    # Calculate the upper and lower bounds based on the threshold
+    upper_bounds = means + threshold * std_devs
+    lower_bounds = means - threshold * std_devs
+    
+    # Winsorize the data: Replace outliers with the threshold values
+    df = df.apply(lambda x: x.clip(lower=lower_bounds[x.name], upper=upper_bounds[x.name]))
+    
+    return df
 
-def process_files(base_folder, file_names, output_dir):
-    """
-    Processes a list of CSV files by reading, filtering outliers, applying Winsorization, and saving cleaned data.
+def save_sd_file(df, sd_file_path, threshold=2.5):
+    # Calculate the mean and standard deviation for each column
+    means = df.mean()
+    std_devs = df.std()
+    
+    # Calculate the upper and lower bounds based on the threshold
+    upper_bounds = means + threshold * std_devs
+    lower_bounds = means - threshold * std_devs
+    
+    # Create a DataFrame to store the SD information
+    sd_df = pd.DataFrame({
+        'mean': means,
+        f'-{threshold}SD': lower_bounds,
+        f'+{threshold}SD': upper_bounds
+    })
+    
+    # Save the SD DataFrame to a CSV file
+    sd_df.to_csv(sd_file_path, index=True)
+    print(f"SD file saved as {sd_file_path}")
 
-    Parameters:
-    base_folder (str): The base folder where the CSV files are located.
-    file_names (list of str): List of file names to be processed.
-    output_dir (str): Directory where the processed CSV files will be saved.
+def process_individual_recordings(individual_recordings_path):
+    # List of specific CSV files to process
+    csv_files = ['ACC.csv', 'BVP.csv', 'EDA.csv', 'HR.csv', 'TEMP.csv']
+    
+    # Additional files to copy
+    additional_files = ['info.txt', 'tags.csv']
 
-    Returns:
-    None
-    """
-    if not output_dir.endswith('/'):
-        output_dir += '/'
+    # Path to the individual recordings folder
+    recordings_path = Path(individual_recordings_path)
+    
+    # Path to the clean individual recordings folder
+    clean_recordings_path = Path(individual_recordings_path).parent / "clean_individual_recordings"
+    clean_recordings_path.mkdir(exist_ok=True)
 
-    if not base_folder.endswith('/'):
-        base_folder += '/'
+    # Iterate through each participant's folder within the individual recordings folder
+    for participant_folder in recordings_path.iterdir():
+        if participant_folder.is_dir():
+            print(f"Processing participant: {participant_folder.name}")
+            clean_participant_folder = clean_recordings_path / f"c_{participant_folder.name}"
+            clean_participant_folder.mkdir(exist_ok=True)
+            
+            for file_name in csv_files:
+                file_path = participant_folder / file_name
+                
+                # Debugging: Print the path being checked
+                print(f"Checking path: {file_path}")
+                
+                if file_path.exists():
+                    print(f"Processing file: {file_name} for participant: {participant_folder.name}")
+                    df = pd.read_csv(file_path)
+                    
+                    # Exclude the first two rows
+                    df = df.iloc[2:]
+                    
+                    # Step 1: Handle missing values
+                    for column in df.columns:
+                        if df[column].isnull().any():
+                            if pd.api.types.is_numeric_dtype(df[column]):
+                                mean_value = df[column].mean()
+                                df[column].fillna(mean_value, inplace=True)
+                                print(f"Filled missing values in {column} with mean: {mean_value}")
+                            else:
+                                print(f"Non-numeric data type found in column: {column} in file {file_name}")
+                    
+                    # Step 2: Identify outliers and exclude files if necessary
+                    if filter_out_csv(df):
+                        # Step 3: Winsorize the data if the file is not excluded
+                        df = winsorize_data(df)
+                        
+                        # Save the processed DataFrame to the clean folder with the 'c_' prefix
+                        clean_file_path = clean_participant_folder / f"c_{file_name}"
+                        df.to_csv(clean_file_path, index=False)
+                        print(f"File {file_name} has been winsorized and saved as {clean_file_path}")
+                        
+                        # Step 4: Save the SD DataFrame to the clean folder with the 'sd_' prefix
+                        sd_file_path = clean_participant_folder / f"sd_{file_name}"
+                        save_sd_file(df, sd_file_path)
+                    else:
+                        print(f"File {file_name} for participant {participant_folder.name} has been excluded due to high outlier count.")
+                else:
+                    print(f"File not found: {file_name} in participant folder: {participant_folder.name}")
+            
+            # Copy additional files (info.txt, tags.csv) to the clean folder
+            for additional_file in additional_files:
+                additional_file_path = participant_folder / additional_file
+                if additional_file_path.exists():
+                    shutil.copy(additional_file_path, clean_participant_folder)
+                    print(f"Copied {additional_file} to {clean_participant_folder}")
 
-    for file_name in file_names:
-        file_path = base_folder + file_name
-        df, timestamps = read_and_prepare_dataframe(file_path)
-        df_filtered = filter_participants_by_outliers(df)
-        df_winsorized = apply_winsorization(df_filtered)
-        df_winsorized.insert(0, 'Timestamp', timestamps)
-        output_path = output_dir + "cleaned_" + file_name
-        df_winsorized.to_csv(output_path, index=False)
-
-base_folder = '/Users/freyaprein/Documents/GitHub/reutnaim_hackathon2024'
-file_names = [
-    'bvp_concatenated.csv',
-    'acc_concatenated.csv',
-    'eda_concatenated.csv',
-    'hr_concatenated.csv',
-    'ibi_concatenated.csv'
-]
-
-output_dir = base_folder + '/cleaned_files'
-
-process_files(base_folder, file_names, output_dir)
+# Example usage:
+process_individual_recordings('/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/individual recordings')
