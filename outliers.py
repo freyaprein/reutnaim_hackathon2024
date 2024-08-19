@@ -43,10 +43,7 @@ def winsorize_data(df, threshold=2.5):
     return df
 
 def save_sd_file(df, sd_file_path, threshold=2.5):
-    # Remove the first column (timestamp)
-    df = df.iloc[:, 1:]
-    
-    # Calculate the mean and standard deviation for each remaining column
+    # Calculate the mean and standard deviation for each column
     means = df.mean()
     std_devs = df.std()
     
@@ -66,7 +63,7 @@ def save_sd_file(df, sd_file_path, threshold=2.5):
     print(f"SD file saved as {sd_file_path}")
 
 def process_individual_recordings(individual_recordings_path):
-    # List of keywords to look for in the filenames
+    # Keywords to identify relevant CSV files
     keywords = ['ACC', 'BVP', 'EDA', 'HR', 'TEMP']
     
     # Additional files to copy
@@ -86,7 +83,7 @@ def process_individual_recordings(individual_recordings_path):
             clean_participant_folder = clean_recordings_path / f"c_{participant_folder.name}"
             clean_participant_folder.mkdir(exist_ok=True)
             
-            # Iterate over files in the participant folder
+            # Iterate over all files in the participant folder
             for file_path in participant_folder.glob('*.csv'):
                 file_name = file_path.name
                 
