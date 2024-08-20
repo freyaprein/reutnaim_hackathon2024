@@ -5,7 +5,7 @@
 import pytest
 
 
-from reut_naim_hackathon_project_2 import reut_naim_hackathon_project_2
+from empatica_processing import reut_naim_hackathon_project_2
 
 
 @pytest.fixture
