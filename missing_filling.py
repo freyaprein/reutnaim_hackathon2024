@@ -2,10 +2,10 @@ import pandas as pd
 from pathlib import Path
 import shutil
 
-class SubjectDataProcessor: 
+class UnusualSubjectDataProcessor: 
     def __init__(self, base_folder):
         """
-        Initializes an instance of the SubjectDataProcessor class.
+        Initializes an instance of the UnusualSubjectDataProcessor class.
         Parameters:
         - base_folder (str or Path): The base folder path.
         Returns:
@@ -30,7 +30,7 @@ class SubjectDataProcessor:
             print(f"Skipping {subject_folder.name} because it does not have exactly two subfolders.")
             return False
 
-        for subfolder in subfolders:
+        for subfolder in subfolders: # Check if the subfolders are not empty and do not contain duplicate files
             if not any(subfolder.iterdir()):
                 print(f"Warning: Subfolder {subfolder.name} in {subject_folder.name} is empty.")
                 return False
@@ -52,12 +52,12 @@ class SubjectDataProcessor:
         Returns:
         - pd.DataFrame or None: The DataFrame if valid, None otherwise.
         """
-        if not filepath.exists():
+        if not filepath.exists(): # Check if the file exists
             print(f"Expected file {filename} is missing in {folder_name}.")
             return None
 
-        data = pd.read_csv(filepath, header=None)
-        if data.empty:
+        data = pd.read_csv(filepath, header=None) # Check if the file is empty
+        if data.empty: 
             print(f"File {filename} is empty in {folder_name}.")
             return None
 
@@ -75,28 +75,27 @@ class SubjectDataProcessor:
         combined_data = {}
         csv_files = ['ACC.csv', 'BVP.csv', 'EDA.csv', 'HR.csv', 'TEMP.csv']
 
-        for csv_file in csv_files:
+        for csv_file in csv_files: # Process each CSV file
             file_path1 = subfolders[0] / csv_file
             file_path2 = subfolders[1] / csv_file
 
             recording1 = self.read_and_validate_csv(file_path1, subject_folder.name, csv_file)
             recording2 = self.read_and_validate_csv(file_path2, subject_folder.name, csv_file)
             
-            if recording1 is None or recording2 is None:
+            if recording1 is None or recording2 is None: # Skip if any of the files are invalid
                 continue
 
-            if recording1.shape[1] != recording2.shape[1]:
+            if recording1.shape[1] != recording2.shape[1]: # Check for mismatched number of columns
                 print(f"Error: Mismatched number of columns in {csv_file} for {subject_folder.name}. Skipping these files.")
                 continue
 
-            # Check for negative sampling rates
-            sampling_rate1 = float(recording1.iloc[1, 0])
+            sampling_rate1 = float(recording1.iloc[1, 0]) # Check for negative sampling rates
             sampling_rate2 = float(recording2.iloc[1, 0])
             if sampling_rate1 <= 0 or sampling_rate2 <= 0:
                 print(f"Error: Negative or zero sampling rate found in {csv_file} for {subject_folder.name}. Skipping these files.")
                 continue
 
-            filled_recording = self.determine_time_gap_and_fill(recording1, recording2)
+            filled_recording = self.determine_time_gap_and_fill(recording1, recording2) # Fill in missing values
             combined_data[csv_file] = filled_recording
 
         return combined_data
@@ -107,15 +106,15 @@ class SubjectDataProcessor:
         Returns:
         - None
         """
-        for subject_folder in self.base_folder.iterdir():
+        for subject_folder in self.base_folder.iterdir(): # Process each subject folder
             if not self.folder_and_file_validation(subject_folder):
                 continue
 
-            subfolders = [f for f in subject_folder.iterdir() if f.is_dir()]
+            subfolders = [f for f in subject_folder.iterdir() if f.is_dir()] 
             combined_data = self.process_subject_files(subject_folder, subfolders)
             if combined_data:
-                self.save_combined_data(subject_folder, combined_data)
-                self.copy_additional_files(subject_folder, subfolders)
+                self.save_combined_data(subject_folder, combined_data) 
+                self.copy_additional_files(subject_folder, subfolders) 
 
                 print(f"Processed and saved data for subject: {subject_folder.name}")
 
@@ -236,9 +235,9 @@ class SubjectDataProcessor:
 
 def run_subject_data_processor(base_folder):
     """
-    Function to create an instance of SubjectDataProcessor and process the subjects.
+    Function to create an instance of UnusualSubjectDataProcessor and process the subjects.
     """
-    processor = SubjectDataProcessor(base_folder)
+    processor = UnusualSubjectDataProcessor(base_folder)
     processor.process_subjects()
 
 # Example usage:
