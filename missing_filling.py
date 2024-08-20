@@ -62,7 +62,7 @@ class SubjectDataProcessor: # Class to process the data of the subjects
                         for additional_file in additional_files:
                             additional_file_path = subject_folder / subfolders[0] / additional_file
                             if additional_file_path.exists():
-                                shutil.copy(additional_file_path , subject_folder / f"Filled_Merged_{additional_file}")
+                                shutil.copy(additional_file_path , subject_folder / f"{additional_file}")
                                 print(f"Copied {additional_file}")
                     
                         print(f"Processed and saved data for subject: {subject_folder.name}")
