@@ -106,7 +106,7 @@ class UnusualSubjectDataProcessor:
         Returns:
         - None
         """
-        for subject_folder in self.base_folder.iterdir(): # Process each subject folder
+        for subject_folder in self.base_folder.iterdir():
             if not self.folder_and_file_validation(subject_folder):
                 continue
 
@@ -127,25 +127,25 @@ class UnusualSubjectDataProcessor:
         Returns:
         - pd.DataFrame: The filled recording with the missing values.
         """
-        try:
+        try: # Extract timestamps and sampling rates
             timestamp1 = float(recording1.iloc[0, 0])
             sampling_rate1 = float(recording1.iloc[1, 0])
             timestamp2 = float(recording2.iloc[0, 0])
-        except ValueError as e:
+        except ValueError as e: # Handle errors in converting values to float
             print(f"Error converting values to float: {e}")
             return None
 
-        end1 = timestamp1 + (len(recording1) - 2) / sampling_rate1
-        start2 = timestamp2
-        time_gap = start2 - end1
+        end1 = timestamp1 + (len(recording1) - 2) / sampling_rate1 # Calculate the end time of the first recording
+        start2 = timestamp2 # Calculate the start time of the second recording
+        time_gap = start2 - end1 # Calculate the time gap between the two recordings
 
-        if time_gap < 0:
+        if time_gap < 0: # Check for negative time gaps
             print(f"Warning: Negative time gap found between recordings in {subject_folder.name}. Skipping.")
             return None
 
-        no_rows = int(time_gap * sampling_rate1)
-        missing_values = self.generate_dummy_rows(no_rows, recording1.iloc[2:])
-        filled_recording = self.fill_in_missing_values(recording1, recording2, missing_values)
+        no_rows = int(time_gap * sampling_rate1) # Calculate the number of rows to generate
+        missing_values = self.generate_dummy_rows(no_rows, recording1.iloc[2:]) # Generate dummy rows with missing values
+        filled_recording = self.fill_in_missing_values(recording1, recording2, missing_values) # Fill in missing values
 
         return filled_recording
 
@@ -158,12 +158,12 @@ class UnusualSubjectDataProcessor:
         Returns:
         - pd.DataFrame: A DataFrame with the same columns as the original data, filled with a placeholder value.
         """
-        placeholder = 9999999999
-        if placeholder in original_data.values:
+        placeholder = 9999999999 # Placeholder value for missing data
+        if placeholder in original_data.values: # Check if the placeholder value already exists in the original data
             print(f"Placeholder value {placeholder} already exists in the original data. Please choose a different placeholder.")
             return None
 
-        missing_values = pd.DataFrame(placeholder, index=range(no_rows), columns=original_data.columns)
+        missing_values = pd.DataFrame(placeholder, index=range(no_rows), columns=original_data.columns) # Create a DataFrame with missing values
         return missing_values
 
     def fill_in_missing_values(self, recording1, recording2, missing_values):
@@ -176,13 +176,13 @@ class UnusualSubjectDataProcessor:
         Returns:
         - pd.DataFrame: The filled recording with missing values replaced by the mean value of the corresponding column.
         """
-        if missing_values is None:
+        if missing_values is None: # Check if missing values are generated
             return None
 
-        recording2 = recording2.iloc[2:].reset_index(drop=True)
-        filled_recording = pd.concat([recording1, missing_values, recording2], ignore_index=True)
+        recording2 = recording2.iloc[2:].reset_index(drop=True) # Reset the index of the second recording
+        filled_recording = pd.concat([recording1, missing_values, recording2], ignore_index=True) # Concatenate the recordings
 
-        filled_recording = filled_recording.apply(self.replace_placeholder, axis=0)
+        filled_recording = filled_recording.apply(self.replace_placeholder, axis=0) # Replace the placeholder values with the mean value 
         return filled_recording
 
     def replace_placeholder(self, col, placeholder=9999999999):
@@ -194,10 +194,10 @@ class UnusualSubjectDataProcessor:
         Returns:
         - pd.Series: The column with the placeholder values replaced by the mean value.
         """
-        excl_col = col.iloc[2:]
-        excl_col = excl_col[excl_col != placeholder]
-        col_mean = round(excl_col.mean(), 1) if not excl_col.empty else placeholder
-        col = col.replace(placeholder, col_mean)
+        excl_col = col.iloc[2:] # Exclude the first two rows (timestamps and sampling rates)
+        excl_col = excl_col[excl_col != placeholder] # Exclude the placeholder values
+        col_mean = round(excl_col.mean(), 1) if not excl_col.empty else placeholder # Calculate the mean value
+        col = col.replace(placeholder, col_mean) # Replace the placeholder values with the mean value
         return col
 
     def save_combined_data(self, subject_folder, combined_data):
@@ -209,12 +209,12 @@ class UnusualSubjectDataProcessor:
         Returns:
         - None
         """
-        for csv_file, data in combined_data.items():
-            output_filename = f"Filled_Merged_{csv_file}"
-            output_filepath = subject_folder / output_filename
-            try:
+        for csv_file, data in combined_data.items(): # Save the filled recordings to new CSV files
+            output_filename = f"Filled_Merged_{csv_file}" # Create the output filename
+            output_filepath = subject_folder / output_filename # Create the output filepath
+            try: 
                 data.to_csv(output_filepath, index=False, header=False)
-            except PermissionError:
+            except PermissionError: # Handle permission errors
                 print(f"Warning: Unable to save {output_filename} in {subject_folder.name}. Check file permissions.")
 
     def copy_additional_files(self, subject_folder, subfolders):
@@ -226,7 +226,7 @@ class UnusualSubjectDataProcessor:
         Returns:
         - None
         """
-        additional_files = ['info.txt', 'tags.csv']
+        additional_files = ['info.txt', 'tags.csv'] # Additional files to copy to the subject folder
         for additional_file in additional_files:
             additional_file_path = subfolders[0] / additional_file
             if additional_file_path.exists():
@@ -237,9 +237,9 @@ def run_subject_data_processor(base_folder):
     """
     Function to create an instance of UnusualSubjectDataProcessor and process the subjects.
     """
-    processor = UnusualSubjectDataProcessor(base_folder)
-    processor.process_subjects()
+    processor = UnusualSubjectDataProcessor(base_folder) # Create an instance of UnusualSubjectDataProcessor
+    processor.process_subjects() # Process the subjects
 
 # Example usage:
 base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
-run_subject_data_processor(base_folder)
+run_subject_data_processor(base_folder) # Run the subject data processor
