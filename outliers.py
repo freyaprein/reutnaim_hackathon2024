@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-#from missing_filling import base_folder
+from missing_filling import base_folder
 import shutil
 
 class OutliersDataProcessor:
@@ -110,7 +110,6 @@ class OutliersDataProcessor:
         print(f"Outlier information saved to {outlier_info_file_path}")
 
 
-# Example usage late to be imported from missing_filling import base_folder
-base_folder = "/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/"
+# Usage with base_folder from missing_filling 
 processor = OutliersDataProcessor(base_folder)
 processor.process_individual_recordings()
