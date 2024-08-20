@@ -1,11 +1,6 @@
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
-print(pd.__version__)
-import matplotlib
-print(matplotlib.__version__)
-import numpy as np
-print(np.__version__)
 
 
 class ParticipantDataPlotter:
@@ -201,8 +196,8 @@ class ParticipantDataPlotter:
         
 
 # Example usage
-base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/"  # Replace with the actual path to your main folder
-plotter = ParticipantDataPlotter(base_folder)
-plotter.plot_participant_data()
+#base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/"  # Replace with the actual path to your main folder
+#plotter = ParticipantDataPlotter(base_folder)
+#plotter.plot_participant_data()
 
 

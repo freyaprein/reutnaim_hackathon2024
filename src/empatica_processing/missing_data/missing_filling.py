@@ -95,7 +95,7 @@ class UnusualSubjectDataProcessor:
                 print(f"Error: Negative or zero sampling rate found in {csv_file} for {subject_folder.name}. Skipping these files.")
                 continue
 
-            filled_recording = self.determine_time_gap_and_fill(recording1, recording2) # Fill in missing values
+            filled_recording = self.determine_time_gap_and_fill(recording1, recording2, subject_folder) # Fill in missing values
             combined_data[csv_file] = filled_recording
 
         return combined_data
@@ -243,3 +243,6 @@ def run_subject_data_processor(base_folder):
 # # Example usage:
 # base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
 # run_subject_data_processor(base_folder) # Run the subject data processor
+
+#base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab"
+#run_subject_data_processor(base_folder)

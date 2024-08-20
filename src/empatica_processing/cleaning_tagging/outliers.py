@@ -145,6 +145,7 @@ class OutliersDataProcessor:
         print(f"Outlier information saved to {outlier_info_file_path}")
 
 # Usage with base_folder from missing_filling 
-base_folder = "/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/"  # Replace with your actual path
-processor = OutliersDataProcessor(base_folder)
-processor.process_individual_recordings()
+#base_folder = "/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/"  # Replace with your actual path
+#base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab"
+#processor = OutliersDataProcessor(base_folder)
+#processor.process_individual_recordings()

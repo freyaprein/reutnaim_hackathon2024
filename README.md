@@ -1,7 +1,8 @@
-Reut Naim Pre-Processing Pipeline
+Empatica Processing
 =============================
-Pre-processing pipeline for physiological signal data.
-Filtering outliers, handling missing data, tagging, and visualization data collected using Empatica watches.
+Empatica Filtering: Cutting the Noise, Keeping the Heart
+
+Pre-processing pipeline for physiological signal data. Filtering outliers, handling missing data, tagging, and visualization data collected using Empatica watches.
 
 
 ## How it Works
@@ -14,20 +15,18 @@ Filtering outliers, handling missing data, tagging, and visualization data colle
 
 
 ## Usage
---SAMPLE CODE THAT SHOWS HOW TO USE THE LIBRARY--
 
-images that show how to run code. 
-1. what new folders/files look like for missing data folders
+1. After running the missing_filling.py script on "individual recordings" folder, folders of participants with missing data will look like:
 
-<img src="src/reut_naim_hackathon_project_2/Static/clean_individual_folder.png" width="100"/>
+<img src="src/empatica_processing/Static/clean_individual_folder.png" width="100"/>
 
-2. what new clean directory looks like
+2. After running the outliers.py script on "individual recordings" folder, new clean_individual_recordings with filtered data will be made:
 
-<img src="src/reut_naim_hackathon_project_2/Static/missing_data_folder.png" width="100"/>
+<img src="src/empatica_processing/Static/missing_data_folder.png" width="100"/>
 
-3. image of visualization
+3. Visualization of the data after running vis_functions.py:
 
-<img src="src/reut_naim_hackathon_project_2/Static/example_figure_rn23001.png" width="400"/>
+<img src="src/empatica_processing/Static/example_figure_rn23001.png" width="400"/>
 
 
 
