@@ -37,8 +37,8 @@ def plot_participant_data(base_path):
     tags_file_path = folder_path / "tags.csv"
     sd_temp_file_path = folder_path / "sd_TEMP.csv"
     sd_bvp_file_path = folder_path / "sd_BVP.csv"
-    sd_eda_file_path = folder_path / "sd_EDA.csv"
-    sd_hr_file_path = folder_path / "sd_HR.csv"
+    sd_EDA_file_path = folder_path / "sd_EDA.csv"
+    sd_HR_file_path = folder_path / "sd_HR.csv"
 
     # Check if the files exist
     if not bvp_file_path.is_file() or not hr_file_path.is_file() or not eda_file_path.is_file() or not temp_file_path.is_file() or not tags_file_path.is_file():
@@ -49,7 +49,6 @@ def plot_participant_data(base_path):
         hr_data = pd.read_csv(hr_file_path, skiprows=2, header=None)
         eda_data = pd.read_csv(eda_file_path, skiprows=2, header=None)
         temp_data = pd.read_csv(temp_file_path, skiprows=2, header=None)
-        sd_temp_data = pd.read_csv(sd_temp_file_path, header=None)
 
         # Load the value from starting sampling time in UTC from cell A1 of the BVP file - same value for all but HR file
         a1_value = pd.read_csv(bvp_file_path, nrows=1, header=None).iloc[0, 0]
@@ -59,6 +58,24 @@ def plot_participant_data(base_path):
 
         # Subtract the starting sampling time from each tag value
         adjusted_tag_x_values = tags_data[0] - a1_value
+
+        # Load the values from cells C2 and D2 in the sd_TEMP.csv file
+        sd_temp_data = pd.read_csv(sd_temp_file_path, header=None)
+        sdlow_temp = round(float(sd_temp_data.iloc[1, 2]), 1)
+        sdhigh_temp = round(float(sd_temp_data.iloc[1, 3]), 1)  # Cell D2 (second row, fourth column)
+
+        sd_bvp_data = pd.read_csv(sd_bvp_file_path, header=None)
+        sdlow_bvp = round(float(sd_bvp_data.iloc[1, 2]), 1)
+        sdhigh_bvp = round(float(sd_bvp_data.iloc[1, 3]), 1)  # Cell D2 (second row, fourth column)
+
+        sd_EDA_data = pd.read_csv(sd_EDA_file_path, header=None)
+        sdlow_eda = round(float(sd_EDA_data.iloc[1, 2]), 1)
+        sdhigh_eda = round(float(sd_EDA_data.iloc[1, 3]), 1)
+
+        sd_HR_data = pd.read_csv(sd_HR_file_path, header=None)
+        sdlow_hr = round(float(sd_HR_data.iloc[1, 2]), 1)
+        sdhigh_hr = round(float(sd_HR_data.iloc[1, 3]), 1)
+
 
         # Create the x-axis values
         bvp_x_values = [i * 0.015625 for i in range(len(bvp_data))]
@@ -71,8 +88,11 @@ def plot_participant_data(base_path):
         x_max = max(bvp_x_values[-1], hr_x_values[-1], eda_x_values[-1], temp_x_values[-1])
 
 
-        sdlow_temp = round(float(sd_temp_data.iloc[1, 2]), 1)
-        sdhigh_temp = round(float(sd_temp_data.iloc[1, 3]), 1)
+        # Check if any values exceed the standard deviation thresholds
+        check_threshold_exceedance("BVP", bvp_data[0], sdlow_bvp, sdhigh_bvp)
+        check_threshold_exceedance("HR", hr_data[0], sdlow_hr, sdhigh_hr)
+        check_threshold_exceedance("EDA", eda_data[0], sdlow_eda, sdhigh_eda)
+        check_threshold_exceedance("TEMP", temp_data[0], sdlow_temp, sdhigh_temp)
 
 
 
@@ -86,16 +106,25 @@ def plot_participant_data(base_path):
         ax1.plot(bvp_x_values, bvp_data[0], color='blue')
         ax1.set_ylabel('BVP Value')
         ax1.grid(True)
+        ax1.axhline(y=sdlow_bvp, color='black', linestyle='--', linewidth=1.5, label=f'sd_low: {sdlow_bvp}')
+        ax1.axhline(y=sdhigh_bvp, color='black', linestyle='--', linewidth=1.5, label=f'sd_high: {sdhigh_bvp}')
+        ax1.legend(loc='upper right')
 
         # Plot HR data in the second subplot
         ax2.plot(hr_x_values, hr_data[0], color='red')
         ax2.set_ylabel('HR Value')
         ax2.grid(True)
+        ax2.axhline(y=sdlow_hr, color='black', linestyle='--', linewidth=1.5, label=f'sd_low: {sdlow_hr}')
+        ax2.axhline(y=sdhigh_hr, color='black', linestyle='--', linewidth=1.5, label=f'sd_high: {sdhigh_hr}')
+        ax2.legend(loc='upper right')
 
         # Plot EDA data in the third subplot
         ax3.plot(eda_x_values, eda_data[0], color='green')
         ax3.set_ylabel('EDA Value')
         ax3.grid(True)
+        ax3.axhline(y=sdlow_eda, color='black', linestyle='--', linewidth=1.5, label=f'sd_low: {sdlow_eda}')
+        ax3.axhline(y=sdhigh_eda, color='black', linestyle='--', linewidth=1.5, label=f'sd_high: {sdhigh_eda}')
+        ax3.legend(loc='upper right')
 
         # Plot TEMP data in the fourth subplot
         ax4.plot(temp_x_values, temp_data[0], color='purple')
@@ -113,6 +142,7 @@ def plot_participant_data(base_path):
             ax2.axvline(x=tag_x, color='black', linestyle='--', linewidth=1.2)
             ax3.axvline(x=tag_x, color='black', linestyle='--', linewidth=1.2)
             ax4.axvline(x=tag_x, color='black', linestyle='--', linewidth=1.2)
+            ax4.legend(loc='upper right')
 
         # Set the x-axis limits to be the same for all subplots
         ax1.set_xlim(x_min, x_max)
@@ -127,5 +157,16 @@ def plot_participant_data(base_path):
         plt.show()
 
 
+def check_threshold_exceedance(label, data, sdlow, sdhigh):
+   
+    data_to_check = data[2:]
+
+    if any(data_to_check < sdlow):
+        print(f"{label} data goes below the lower standard deviation threshold starting from row 3.")
+    if any(data_to_check > sdhigh):
+        print(f"{label} data goes above the upper standard deviation threshold starting from row 3.")
+
+
+    
 base_folder = Path("/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/")  # Replace with the actual path to your main folder
 plot_participant_data(base_folder)
