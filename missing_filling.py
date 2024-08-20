@@ -240,6 +240,6 @@ def run_subject_data_processor(base_folder):
     processor = UnusualSubjectDataProcessor(base_folder) # Create an instance of UnusualSubjectDataProcessor
     processor.process_subjects() # Process the subjects
 
-# Example usage:
-base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
-run_subject_data_processor(base_folder) # Run the subject data processor
+# # Example usage:
+# base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
+# run_subject_data_processor(base_folder) # Run the subject data processor
