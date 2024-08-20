@@ -84,34 +84,38 @@ def process_individual_recordings(individual_recordings_path):
                     print(f"Processing file: {file_name} for participant: {participant_folder.name}")
                     df = pd.read_csv(file_path)
                     
-                    # Re-add the first row that was excluded
-                    first_row = df.iloc[:1]
-                    df = pd.concat([first_row, df.iloc[1:]], ignore_index=True)
-                    
-                    # Step 1: Handle missing values
-                    for column in df.columns:
-                        if df[column].isnull().any():
-                            if pd.api.types.is_numeric_dtype(df[column]):
-                                mean_value = df[column].mean()
-                                df[column].fillna(mean_value, inplace=True)
+                    # Separate the first and second rows
+                    first_row = df.iloc[:1]  # Header row is already handled by pandas
+                    second_row = df.iloc[1:2]  # Sampling rate row
+                    data_rows = df.iloc[2:]  # The actual data
+
+                    # Step 1: Handle missing values in data rows
+                    for column in data_rows.columns:
+                        if data_rows[column].isnull().any():
+                            if pd.api.types.is_numeric_dtype(data_rows[column]):
+                                mean_value = data_rows[column].mean()
+                                data_rows[column].fillna(mean_value, inplace=True)
                                 print(f"Filled missing values in {column} with mean: {mean_value}")
                             else:
                                 print(f"Non-numeric data type found in column: {column} in file {file_name}")
                     
                     # Step 2: Calculate the SD before Winsorization and save it
                     sd_file_path = clean_participant_folder / f"sd_{file_name}"
-                    save_sd_file(df, sd_file_path)
+                    save_sd_file(data_rows, sd_file_path)
 
                     # Step 3: Winsorize the data based on these bounds
-                    means = df.mean()
-                    std_devs = df.std()
+                    means = data_rows.mean()
+                    std_devs = data_rows.std()
                     upper_bounds = means + 2.5 * std_devs
                     lower_bounds = means - 2.5 * std_devs
-                    df = winsorize_data(df, lower_bounds, upper_bounds)
+                    data_rows = winsorize_data(data_rows, lower_bounds, upper_bounds)
+                    
+                    # Concatenate the first row (header), second row (sampling rate), and processed data rows
+                    final_df = pd.concat([first_row, second_row, data_rows], ignore_index=True)
                     
                     # Step 4: Save the processed DataFrame to the clean folder with the 'c_' prefix
                     clean_file_path = clean_participant_folder / f"c_{file_name}"
-                    df.to_csv(clean_file_path, index=False)
+                    final_df.to_csv(clean_file_path, index=False)
                     print(f"File {file_name} has been winsorized and saved as {clean_file_path}")
             
             # Copy additional files (info.txt, tags.csv) to the clean folder
@@ -122,4 +126,4 @@ def process_individual_recordings(individual_recordings_path):
                     print(f"Copied {additional_file} to {clean_participant_folder}")
 
 # Example usage:
-process_individual_recordings('/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/individual recordings')
+process_individual_recordings('/Users/noursafadi/Desktop/Hackathon_files_adapt_lab/individual recordings')
