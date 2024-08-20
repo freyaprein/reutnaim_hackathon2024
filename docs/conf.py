@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Reut Naim Hackathon project 2'
+project = 'Empatica Processing'
 copyright = "2024, Shiri Arnon"
 author = "Shiri Arnon"
 

@@ -18,15 +18,15 @@ Pre-processing pipeline for physiological signal data. Filtering outliers, handl
 
 1. After running the missing_filling.py script on "individual recordings" folder, folders of participants with missing data will look like:
 
-<img src="src/empatica_processing/Static/clean_individual_folder.png" width="100"/>
+<img src="src/empatica_processing/Static/clean_individual_folder.png" width="400"/>
 
 2. After running the outliers.py script on "individual recordings" folder, new clean_individual_recordings with filtered data will be made:
 
-<img src="src/empatica_processing/Static/missing_data_folder.png" width="100"/>
+<img src="src/empatica_processing/Static/missing_data_folder.png" width="400"/>
 
 3. Visualization of the data after running vis_functions.py:
 
-<img src="src/empatica_processing/Static/example_figure_rn23001.png" width="400"/>
+<img src="src/empatica_processing/Static/example_figure_rn23001.png" width="600"/>
 
 
 
