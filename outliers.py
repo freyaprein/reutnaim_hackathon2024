@@ -1,6 +1,6 @@
-
 import pandas as pd
 from pathlib import Path
+from missing_filling import base_folder
 import shutil
 
 def filter_out_csv(df, threshold=2.5):
@@ -11,25 +11,21 @@ def filter_out_csv(df, threshold=2.5):
     outliers = ((df > upper_bounds) | (df < lower_bounds)).sum()
     total_data_points = len(df)
     percentage_outliers = (outliers / total_data_points) * 100
-    print(f"Percentage of outliers: {percentage_outliers.mean():.3f}%")
-    return percentage_outliers.mean() <= 10
+    return percentage_outliers.mean()
 
 def save_sd_file(df, sd_file_path, threshold=2.5):
-    # Calculate the mean and standard deviation only for the actual data rows
     means = df.mean().round(3)
     std_devs = df.std().round(3)
     upper_bounds = (means + threshold * std_devs).round(3)
     lower_bounds = (means - threshold * std_devs).round(3)
 
-    # Create the DataFrame for SD values with rounded numbers
     sd_df = pd.DataFrame({
         'mean': means,
         f'-{threshold}SD': lower_bounds,
         f'+{threshold}SD': upper_bounds
     })
     
-    # Ensure that the original headers are not included in the sd_ file by saving only the computed stats
-    sd_df.reset_index(drop=True, inplace=True)  # Remove any index that could carry over headers
+    sd_df.reset_index(drop=True, inplace=True)
     sd_df.to_csv(sd_file_path, index=False, header=True)
     print(f"SD file saved as {sd_file_path}")
 
@@ -42,6 +38,8 @@ def process_individual_recordings(base_folder):
     recordings_path = Path(base_folder) / "individual recordings"
     clean_recordings_path = Path(base_folder) / "clean_individual_recordings"
     clean_recordings_path.mkdir(exist_ok=True)
+    
+    outlier_info = []
 
     for participant_folder in recordings_path.iterdir():
         if participant_folder.is_dir():
@@ -67,6 +65,13 @@ def process_individual_recordings(base_folder):
                             else:
                                 print(f"Non-numeric data type found in column: {column} in file {file_name}")
                     
+                    outlier_percentage = filter_out_csv(data_rows)
+                    outlier_info.append({
+                        "Participant": participant_folder.name,
+                        "File": file_name,
+                        "Outlier Percentage": f"{outlier_percentage:.1f}"
+                    })
+
                     sd_file_path = clean_participant_folder / f"sd_{file_name}"
                     save_sd_file(data_rows, sd_file_path)
 
@@ -87,6 +92,12 @@ def process_individual_recordings(base_folder):
                     shutil.copy(additional_file_path, clean_participant_folder)
                     print(f"Copied {additional_file} to {clean_participant_folder}")
 
-# Example usage:
+    # Save the outlier information to a CSV file in the base folder
+    outlier_info_df = pd.DataFrame(outlier_info)
+    outlier_info_file_path = Path(base_folder) / "outlier_info.csv"
+    outlier_info_df.to_csv(outlier_info_file_path, index=False)
+    print(f"Outlier information saved to {outlier_info_file_path}")
+
+# Example usage, later base_folder to be inpoirted from missing_filling.py
 base_folder="/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/"
 process_individual_recordings(base_folder)
