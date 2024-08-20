@@ -18,7 +18,7 @@ def check_threshold_exceedance(label, data, sdlow, sdhigh):
     if any(data_to_check > sdhigh):
         print(f"{label} data goes above the upper standard deviation threshold starting from row 3.")
 
-def plot_data(ax, x_values, data, color, ylabel, sdlow, sdhigh):
+def plot_data(ax, x_values, data, color, ylabel, sdlow=None, sdhigh=None):
     """Plot data on a given axis with standard deviation lines."""
     ax.plot(x_values, data[0], color=color)
     ax.set_ylabel(ylabel)
@@ -26,21 +26,24 @@ def plot_data(ax, x_values, data, color, ylabel, sdlow, sdhigh):
     if sdlow is not None and sdhigh is not None:
         ax.axhline(y=sdlow, color='black', linestyle='--', linewidth=1.5, label=f'sd_low: {sdlow}')
         ax.axhline(y=sdhigh, color='black', linestyle='--', linewidth=1.5, label=f'sd_high: {sdhigh}')
-    ax.legend(loc='upper right')
+        ax.legend(loc='upper right')
 
 def load_sd_values(sd_file_path, participant_id, file_label):
-    """Load standard deviation values from the provided file, with error handling."""
+    """Load standard deviation values from the provided file, without skipping any rows."""
     try:
-        sd_data = load_data(sd_file_path, skiprows=1)
-        if len(sd_data) > 1 and sd_data.shape[1] > 2:
-            sdlow = round(float(sd_data.iloc[1, 2]), 1)
-            sdhigh = round(float(sd_data.iloc[1, 3]), 1)
+        sd_data = pd.read_csv(sd_file_path, header=None)
+        #print(f"Loaded data from {sd_file_path} for participant {participant_id}:")
+        #print(sd_data.head())  # Debugging output to verify the structure
+
+        if len(sd_data) >= 2 and sd_data.shape[1] >= 3:
+            sdlow = round(float(sd_data.iloc[1, 1]), 1)  # B2
+            sdhigh = round(float(sd_data.iloc[1, 2]), 1)  # C2
+            return sdlow, sdhigh
         else:
             raise ValueError(f"{file_label} file for participant {participant_id} does not have the expected structure.")
     except Exception as e:
         print(f"Error loading {file_label} standard deviation values: {e}")
-        sdlow = sdhigh = None
-    return sdlow, sdhigh
+        return None, None
 
 def plot_participant_data(base_path):
     recordings_path = Path(base_path) / "clean_individual_recordings"
