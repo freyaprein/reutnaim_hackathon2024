@@ -2,10 +2,10 @@ import pandas as pd
 from pathlib import Path
 import shutil
 
-class SubjectDataProcessor: 
+class UnusualSubjectDataProcessor: 
     def __init__(self, base_folder):
         """
-        Initializes an instance of the SubjectDataProcessor class.
+        Initializes an instance of the UnusualSubjectDataProcessor class.
         Parameters:
         - base_folder (str or Path): The base folder path.
         Returns:
@@ -30,7 +30,7 @@ class SubjectDataProcessor:
             print(f"Skipping {subject_folder.name} because it does not have exactly two subfolders.")
             return False
 
-        for subfolder in subfolders:
+        for subfolder in subfolders: # Check if the subfolders are not empty and do not contain duplicate files
             if not any(subfolder.iterdir()):
                 print(f"Warning: Subfolder {subfolder.name} in {subject_folder.name} is empty.")
                 return False
@@ -52,12 +52,12 @@ class SubjectDataProcessor:
         Returns:
         - pd.DataFrame or None: The DataFrame if valid, None otherwise.
         """
-        if not filepath.exists():
+        if not filepath.exists(): # Check if the file exists
             print(f"Expected file {filename} is missing in {folder_name}.")
             return None
 
-        data = pd.read_csv(filepath, header=None)
-        if data.empty:
+        data = pd.read_csv(filepath, header=None) # Check if the file is empty
+        if data.empty: 
             print(f"File {filename} is empty in {folder_name}.")
             return None
 
@@ -75,28 +75,27 @@ class SubjectDataProcessor:
         combined_data = {}
         csv_files = ['ACC.csv', 'BVP.csv', 'EDA.csv', 'HR.csv', 'TEMP.csv']
 
-        for csv_file in csv_files:
+        for csv_file in csv_files: # Process each CSV file
             file_path1 = subfolders[0] / csv_file
             file_path2 = subfolders[1] / csv_file
 
             recording1 = self.read_and_validate_csv(file_path1, subject_folder.name, csv_file)
             recording2 = self.read_and_validate_csv(file_path2, subject_folder.name, csv_file)
             
-            if recording1 is None or recording2 is None:
+            if recording1 is None or recording2 is None: # Skip if any of the files are invalid
                 continue
 
-            if recording1.shape[1] != recording2.shape[1]:
+            if recording1.shape[1] != recording2.shape[1]: # Check for mismatched number of columns
                 print(f"Error: Mismatched number of columns in {csv_file} for {subject_folder.name}. Skipping these files.")
                 continue
 
-            # Check for negative sampling rates
-            sampling_rate1 = float(recording1.iloc[1, 0])
+            sampling_rate1 = float(recording1.iloc[1, 0]) # Check for negative sampling rates
             sampling_rate2 = float(recording2.iloc[1, 0])
             if sampling_rate1 <= 0 or sampling_rate2 <= 0:
                 print(f"Error: Negative or zero sampling rate found in {csv_file} for {subject_folder.name}. Skipping these files.")
                 continue
 
-            filled_recording = self.determine_time_gap_and_fill(recording1, recording2)
+            filled_recording = self.determine_time_gap_and_fill(recording1, recording2) # Fill in missing values
             combined_data[csv_file] = filled_recording
 
         return combined_data
@@ -111,15 +110,15 @@ class SubjectDataProcessor:
             if not self.folder_and_file_validation(subject_folder):
                 continue
 
-            subfolders = [f for f in subject_folder.iterdir() if f.is_dir()]
+            subfolders = [f for f in subject_folder.iterdir() if f.is_dir()] 
             combined_data = self.process_subject_files(subject_folder, subfolders)
             if combined_data:
-                self.save_combined_data(subject_folder, combined_data)
-                self.copy_additional_files(subject_folder, subfolders)
+                self.save_combined_data(subject_folder, combined_data) 
+                self.copy_additional_files(subject_folder, subfolders) 
 
                 print(f"Processed and saved data for subject: {subject_folder.name}")
 
-    def determine_time_gap_and_fill(self, recording1, recording2):
+    def determine_time_gap_and_fill(self, recording1, recording2, subject_folder):
         """
         Determines the time gap between two recordings and fills in the missing values.
         Parameters:
@@ -128,25 +127,25 @@ class SubjectDataProcessor:
         Returns:
         - pd.DataFrame: The filled recording with the missing values.
         """
-        try:
+        try: # Extract timestamps and sampling rates
             timestamp1 = float(recording1.iloc[0, 0])
             sampling_rate1 = float(recording1.iloc[1, 0])
             timestamp2 = float(recording2.iloc[0, 0])
-        except ValueError as e:
+        except ValueError as e: # Handle errors in converting values to float
             print(f"Error converting values to float: {e}")
             return None
 
-        end1 = timestamp1 + (len(recording1) - 2) / sampling_rate1
-        start2 = timestamp2
-        time_gap = start2 - end1
+        end1 = timestamp1 + (len(recording1) - 2) / sampling_rate1 # Calculate the end time of the first recording
+        start2 = timestamp2 # Calculate the start time of the second recording
+        time_gap = start2 - end1 # Calculate the time gap between the two recordings
 
-        if time_gap < 0:
+        if time_gap < 0: # Check for negative time gaps
             print(f"Warning: Negative time gap found between recordings in {subject_folder.name}. Skipping.")
             return None
 
-        no_rows = int(time_gap * sampling_rate1)
-        missing_values = self.generate_dummy_rows(no_rows, recording1.iloc[2:])
-        filled_recording = self.fill_in_missing_values(recording1, recording2, missing_values)
+        no_rows = int(time_gap * sampling_rate1) # Calculate the number of rows to generate
+        missing_values = self.generate_dummy_rows(no_rows, recording1.iloc[2:]) # Generate dummy rows with missing values
+        filled_recording = self.fill_in_missing_values(recording1, recording2, missing_values) # Fill in missing values
 
         return filled_recording
 
@@ -159,12 +158,12 @@ class SubjectDataProcessor:
         Returns:
         - pd.DataFrame: A DataFrame with the same columns as the original data, filled with a placeholder value.
         """
-        placeholder = 9999999999
-        if placeholder in original_data.values:
+        placeholder = 9999999999 # Placeholder value for missing data
+        if placeholder in original_data.values: # Check if the placeholder value already exists in the original data
             print(f"Placeholder value {placeholder} already exists in the original data. Please choose a different placeholder.")
             return None
 
-        missing_values = pd.DataFrame(placeholder, index=range(no_rows), columns=original_data.columns)
+        missing_values = pd.DataFrame(placeholder, index=range(no_rows), columns=original_data.columns) # Create a DataFrame with missing values
         return missing_values
 
     def fill_in_missing_values(self, recording1, recording2, missing_values):
@@ -177,13 +176,13 @@ class SubjectDataProcessor:
         Returns:
         - pd.DataFrame: The filled recording with missing values replaced by the mean value of the corresponding column.
         """
-        if missing_values is None:
+        if missing_values is None: # Check if missing values are generated
             return None
 
-        recording2 = recording2.iloc[2:].reset_index(drop=True)
-        filled_recording = pd.concat([recording1, missing_values, recording2], ignore_index=True)
+        recording2 = recording2.iloc[2:].reset_index(drop=True) # Reset the index of the second recording
+        filled_recording = pd.concat([recording1, missing_values, recording2], ignore_index=True) # Concatenate the recordings
 
-        filled_recording = filled_recording.apply(self.replace_placeholder, axis=0)
+        filled_recording = filled_recording.apply(self.replace_placeholder, axis=0) # Replace the placeholder values with the mean value 
         return filled_recording
 
     def replace_placeholder(self, col, placeholder=9999999999):
@@ -195,10 +194,10 @@ class SubjectDataProcessor:
         Returns:
         - pd.Series: The column with the placeholder values replaced by the mean value.
         """
-        excl_col = col.iloc[2:]
-        excl_col = excl_col[excl_col != placeholder]
-        col_mean = round(excl_col.mean(), 1) if not excl_col.empty else placeholder
-        col = col.replace(placeholder, col_mean)
+        excl_col = col.iloc[2:] # Exclude the first two rows (timestamps and sampling rates)
+        excl_col = excl_col[excl_col != placeholder] # Exclude the placeholder values
+        col_mean = round(excl_col.mean(), 1) if not excl_col.empty else placeholder # Calculate the mean value
+        col = col.replace(placeholder, col_mean) # Replace the placeholder values with the mean value
         return col
 
     def save_combined_data(self, subject_folder, combined_data):
@@ -210,12 +209,12 @@ class SubjectDataProcessor:
         Returns:
         - None
         """
-        for csv_file, data in combined_data.items():
-            output_filename = f"Filled_Merged_{csv_file}"
-            output_filepath = subject_folder / output_filename
-            try:
+        for csv_file, data in combined_data.items(): # Save the filled recordings to new CSV files
+            output_filename = f"Filled_Merged_{csv_file}" # Create the output filename
+            output_filepath = subject_folder / output_filename # Create the output filepath
+            try: 
                 data.to_csv(output_filepath, index=False, header=False)
-            except PermissionError:
+            except PermissionError: # Handle permission errors
                 print(f"Warning: Unable to save {output_filename} in {subject_folder.name}. Check file permissions.")
 
     def copy_additional_files(self, subject_folder, subfolders):
@@ -227,7 +226,7 @@ class SubjectDataProcessor:
         Returns:
         - None
         """
-        additional_files = ['info.txt', 'tags.csv']
+        additional_files = ['info.txt', 'tags.csv'] # Additional files to copy to the subject folder
         for additional_file in additional_files:
             additional_file_path = subfolders[0] / additional_file
             if additional_file_path.exists():
@@ -236,11 +235,11 @@ class SubjectDataProcessor:
 
 def run_subject_data_processor(base_folder):
     """
-    Function to create an instance of SubjectDataProcessor and process the subjects.
+    Function to create an instance of UnusualSubjectDataProcessor and process the subjects.
     """
-    processor = SubjectDataProcessor(base_folder)
-    processor.process_subjects()
+    processor = UnusualSubjectDataProcessor(base_folder) # Create an instance of UnusualSubjectDataProcessor
+    processor.process_subjects() # Process the subjects
 
-# Example usage:
-base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
-run_subject_data_processor(base_folder)
+# # Example usage:
+# base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
+# run_subject_data_processor(base_folder) # Run the subject data processor
