@@ -22,12 +22,12 @@ class UnusualSubjectDataProcessor:
         - bool: True if the folder and files are valid, False otherwise.
         """
         if not subject_folder.is_dir() or not subject_folder.name.startswith('rn'): # Check if the folder is a directory and starts with 'rn'
-            print(f"Skipping {subject_folder.name}. Folder must start with 'rn' and be a directory.")
+            #print(f"Skipping {subject_folder.name}. Folder must start with 'rn' and be a directory.")
             return False
 
         subfolders = [f for f in subject_folder.iterdir() if f.is_dir()] # Check if the subject folder has exactly two subfolders
         if len(subfolders) != 2:
-            print(f"Skipping {subject_folder.name} because it does not have exactly two subfolders.")
+            #print(f"Skipping {subject_folder.name} because it does not have exactly two subfolders.")
             return False
 
         for subfolder in subfolders: # Check if the subfolders are not empty and do not contain duplicate files
