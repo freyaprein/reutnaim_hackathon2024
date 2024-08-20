@@ -88,7 +88,11 @@ def plot_participant_data(base_path):
         x_max = max(bvp_x_values[-1], hr_x_values[-1], eda_x_values[-1], temp_x_values[-1])
 
 
-   
+        # Check if any values exceed the standard deviation thresholds
+        check_threshold_exceedance("BVP", bvp_data[0], sdlow_bvp, sdhigh_bvp)
+        check_threshold_exceedance("HR", hr_data[0], sdlow_hr, sdhigh_hr)
+        check_threshold_exceedance("EDA", eda_data[0], sdlow_eda, sdhigh_eda)
+        check_threshold_exceedance("TEMP", temp_data[0], sdlow_temp, sdhigh_temp)
 
 
 
@@ -153,5 +157,16 @@ def plot_participant_data(base_path):
         plt.show()
 
 
+def check_threshold_exceedance(label, data, sdlow, sdhigh):
+   
+    data_to_check = data[2:]
+
+    if any(data_to_check < sdlow):
+        print(f"{label} data goes below the lower standard deviation threshold starting from row 3.")
+    if any(data_to_check > sdhigh):
+        print(f"{label} data goes above the upper standard deviation threshold starting from row 3.")
+
+
+    
 base_folder = Path("/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/")  # Replace with the actual path to your main folder
 plot_participant_data(base_folder)
