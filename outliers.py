@@ -54,7 +54,7 @@ def winsorize_data(df, lower_bounds, upper_bounds):
     
     return df
 
-def process_individual_recordings(individual_recordings_path):
+def process_individual_recordings(base_folder):
     # Keywords to identify relevant CSV files
     keywords = ['ACC', 'BVP', 'EDA', 'HR', 'TEMP']
     
@@ -62,10 +62,10 @@ def process_individual_recordings(individual_recordings_path):
     additional_files = ['info.txt', 'tags.csv']
 
     # Path to the individual recordings folder
-    recordings_path = Path(individual_recordings_path)
+    recordings_path = Path(base_folder) / "individual recordings"
     
     # Path to the clean individual recordings folder
-    clean_recordings_path = Path(individual_recordings_path).parent / "clean_individual_recordings"
+    clean_recordings_path = Path(base_folder) / "clean_individual_recordings"
     clean_recordings_path.mkdir(exist_ok=True)
 
     # Iterate through each participant's folder within the individual recordings folder
@@ -126,4 +126,4 @@ def process_individual_recordings(individual_recordings_path):
                     print(f"Copied {additional_file} to {clean_participant_folder}")
 
 # Example usage:
-process_individual_recordings('/Users/noursafadi/Desktop/Hackathon_files_adapt_lab/individual recordings')
+process_individual_recordings('/Users/noursafadi/Desktop/Hackathon_files_adapt_lab/')
