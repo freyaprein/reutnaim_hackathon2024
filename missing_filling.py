@@ -118,7 +118,7 @@ class UnusualSubjectDataProcessor:
 
                 print(f"Processed and saved data for subject: {subject_folder.name}")
 
-    def determine_time_gap_and_fill(self, recording1, recording2):
+    def determine_time_gap_and_fill(self, recording1, recording2, subject_folder):
         """
         Determines the time gap between two recordings and fills in the missing values.
         Parameters:
