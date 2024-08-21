@@ -112,7 +112,7 @@ class ParticipantDataPlotter:
         """
         available_ids = [folder.name[4:] for folder in self.recordings_path.iterdir() if folder.is_dir()]
 
-        self.participant_id = input("Please enter the participant ID in the form '#####': ")
+        self.participant_id = input("For visualizing the clean and tagged data of a single participant, please enter the participant ID in the form '#####': ")
         if self.participant_id not in available_ids:
             print(f"No rn{self.participant_id} folder found for participant ID: {self.participant_id}\n"
                   "Input format should be: ##### with no rn\n")
@@ -195,9 +195,6 @@ class ParticipantDataPlotter:
         plt.show()
         
 
-# Example usage
-# base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/"  # Replace with the actual path to your main folder
-# plotter = ParticipantDataPlotter(base_folder)
-# plotter.plot_participant_data()
+
 
 
