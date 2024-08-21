@@ -1,11 +1,10 @@
-"""Main module."""
-
 from missing_data.missing_filling import UnusualSubjectDataProcessor
 from cleaning_tagging.outliers import OutliersDataProcessor
-from Visualization.vis_functions import ParticipantDataPlotter
+from visualization.vis_functions import ParticipantDataPlotter
 
 def main():
-    base_folder = "/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab"
+    # Prompt the user to input the base folder path
+    base_folder = input("Please insert the path to the folder containing the participants data folders: ").strip()
     
     # Process subjects using UnusualSubjectDataProcessor
     processor = UnusualSubjectDataProcessor(base_folder)
