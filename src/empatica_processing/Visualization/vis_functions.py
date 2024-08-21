@@ -191,13 +191,13 @@ class ParticipantDataPlotter:
 
         # Adjust layout to make room for the title
         plt.tight_layout(rect=[0, 0, 1, 0.95])
-        plt.savefig("example_figure_rn23001.png")
+        plt.savefig("example_figure_rn23096.png")
         plt.show()
         
 
 # Example usage
-#base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/"  # Replace with the actual path to your main folder
-#plotter = ParticipantDataPlotter(base_folder)
-#plotter.plot_participant_data()
+# base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab/"  # Replace with the actual path to your main folder
+# plotter = ParticipantDataPlotter(base_folder)
+# plotter.plot_participant_data()
 
 
