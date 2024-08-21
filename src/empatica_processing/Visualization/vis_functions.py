@@ -32,6 +32,22 @@ class ParticipantDataPlotter:
             pd.DataFrame: The loaded data as a pandas DataFrame.
         """
         return pd.read_csv(file_path, skiprows=skiprows, header=None)
+    
+    def get_data_file_path(self, base_file_path):
+        """
+        Determine whether to use the standard or filled/merged data file.
+
+        Args:
+            base_file_path (Path): The base path to the standard data file.
+
+        Returns:
+            Path: The path to the data file to be used.
+        """
+        merged_file_path = base_file_path.with_name(f"c_Filled_Merged_{base_file_path.stem[2:]}.csv")
+        if merged_file_path.exists():
+            return merged_file_path
+        else:
+            return base_file_path
 
     def calculate_x_values(self, data_length, increment):
         """
@@ -58,9 +74,11 @@ class ParticipantDataPlotter:
         """
         data_to_check = data[2:]  # Ignore the first two rows of data
         if any(data_to_check < sdlow):
-            print(f"{label} data goes below the lower standard deviation threshold starting from row 3.")
+            return
+            #print(f"{label} data goes below the lower standard deviation threshold starting from row 3.")
         if any(data_to_check > sdhigh):
-            print(f"{label} data goes above the upper standard deviation threshold starting from row 3.")
+            return
+            # print(f"{label} data goes above the upper standard deviation threshold starting from row 3.")
 
     def plot_data(self, ax, x_values, data, color, ylabel, sdlow=None, sdhigh=None):
         """
@@ -106,31 +124,53 @@ class ParticipantDataPlotter:
             print(f"Error loading {file_label} standard deviation values: {e}")
             return None, None
 
+
+    def get_sd_file_path(self, base_file_path):
+        """
+        Determine whether to use the standard or filled/merged SD file.
+
+        Args:
+            base_file_path (Path): The base path to the standard SD file.
+
+        Returns:
+            Path: The path to the SD file to be used.
+        """
+        merged_file_path = base_file_path.with_name(f"sd_Filled_Merged_{base_file_path.stem[3:]}.csv")
+        if merged_file_path.exists():
+            return merged_file_path
+        else:
+            return base_file_path
+
+
+
     def plot_participant_data(self):
         """
         Load and plot data for a specific participant.
         """
         available_ids = [folder.name[4:] for folder in self.recordings_path.iterdir() if folder.is_dir()]
 
-        self.participant_id = input("For visualizing the clean and tagged data of a single participant, please enter the participant ID in the form '#####': ")
+        self.participant_id = input("Please enter the participant ID in the form '#####': ")
         if self.participant_id not in available_ids:
             print(f"No rn{self.participant_id} folder found for participant ID: {self.participant_id}\n"
                   "Input format should be: ##### with no rn\n")
             return
 
         self.folder_path = self.recordings_path / f"c_rn{self.participant_id}"
-
-        # Define file paths
-        bvp_file_path = self.folder_path / "c_BVP.csv"
-        hr_file_path = self.folder_path / "c_HR.csv"
-        eda_file_path = self.folder_path / "c_EDA.csv"
-        temp_file_path = self.folder_path / "c_TEMP.csv"
+       
+        bvp_file_path = self.get_data_file_path(self.folder_path / "c_BVP.csv")
+        hr_file_path = self.get_data_file_path(self.folder_path / "c_HR.csv")
+        eda_file_path = self.get_data_file_path(self.folder_path / "c_EDA.csv")
+        temp_file_path = self.get_data_file_path(self.folder_path / "c_TEMP.csv")
         tags_file_path = self.folder_path / "tags.csv"
-        sd_temp_file_path = self.folder_path / "sd_TEMP.csv"
-        sd_bvp_file_path = self.folder_path / "sd_BVP.csv"
-        sd_eda_file_path = self.folder_path / "sd_EDA.csv"
-        sd_hr_file_path = self.folder_path / "sd_HR.csv"
+        
+        
+        sd_temp_file_path = self.get_sd_file_path(self.folder_path / "sd_TEMP.csv")
+        sd_bvp_file_path = self.get_sd_file_path(self.folder_path / "sd_BVP.csv")
+        sd_eda_file_path = self.get_sd_file_path(self.folder_path / "sd_EDA.csv")
+        sd_hr_file_path = self.get_sd_file_path(self.folder_path / "sd_HR.csv")
 
+        #print(bvp_file_path, hr_file_path, eda_file_path, temp_file_path, tags_file_path, sd_temp_file_path, sd_bvp_file_path, sd_eda_file_path, sd_hr_file_path)
+        
         # Check if all required files exist
         if not all(file.is_file() for file in [bvp_file_path, hr_file_path, eda_file_path, temp_file_path, tags_file_path]):
             print(f"One or more files for participant ID {self.participant_id} do not exist.")
@@ -191,10 +231,4 @@ class ParticipantDataPlotter:
 
         # Adjust layout to make room for the title
         plt.tight_layout(rect=[0, 0, 1, 0.95])
-        plt.savefig("example_figure_rn23096.png")
         plt.show()
-        
-
-
-
-
