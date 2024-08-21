@@ -226,8 +226,3 @@ class ParticipantDataPlotter:
         print("All individual figures have been generated and saved to the each participant's folder in the 'clean_individual_recordings' folder.")
 
 
-
-# base_folder = '/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab'
-# plotter = ParticipantDataPlotter(base_folder)
-# plotter.plot_participant_data()
-
