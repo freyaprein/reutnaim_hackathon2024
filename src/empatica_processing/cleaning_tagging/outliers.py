@@ -25,7 +25,7 @@ class OutliersDataProcessor:
         self.keywords = ['ACC', 'BVP', 'EDA', 'HR', 'TEMP']
         self.additional_files = ['info.txt', 'tags.csv']
         self.outlier_info = []
-        print("Please wait a moment while the outliers will be winsorized and the time tags will be added in a new column...")
+        print("Please wait a moment while the outliers will be winsorized and the time tags will be added in a new column. This may take up to a few minutes...")
 
     def filter_out_csv(self, df):
         """
