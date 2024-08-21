@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from pathlib import Path
-from src.empatica_processing.cleaning_tagging.outliers import OutliersDataProcessor
+from empatica_processing.cleaning_tagging.outliers import OutliersDataProcessor
 
 @pytest.fixture
 def setup_environment(tmp_path):
