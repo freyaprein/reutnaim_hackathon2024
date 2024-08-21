@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/ShiriAr/reut_naim_hackathon_project_2/issues.
+Report bugs at https://github.com/freyaprein/reutnaim_hackathon2024/issues.
 
 If you are reporting a bug, please include:
 
