@@ -1,7 +1,7 @@
 Empatica Processing
 =============================
 
-<img src="src/empatica_processing/static/logo.jpeg" width="150"/>
+<img src="src/empatica_processing/Static/logo.jpeg" width="150"/>
 
 Empatica Filtering: Cutting the Noise, Keeping the Heart
 
