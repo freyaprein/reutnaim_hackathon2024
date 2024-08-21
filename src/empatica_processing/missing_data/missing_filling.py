@@ -231,7 +231,7 @@ class UnusualSubjectDataProcessor:
             additional_file_path = subfolders[0] / additional_file
             if additional_file_path.exists():
                 shutil.copy(additional_file_path, subject_folder / additional_file)
-                print(f"Copied {additional_file}.")
+                #print(f"Copied {additional_file}.")
 
 def run_subject_data_processor(base_folder):
     """
@@ -240,9 +240,3 @@ def run_subject_data_processor(base_folder):
     processor = UnusualSubjectDataProcessor(base_folder) # Create an instance of UnusualSubjectDataProcessor
     processor.process_subjects() # Process the subjects
 
-# # Example usage:
-# base_folder = '/Users/sofiakarageorgiou/Desktop/Hackathon_files_adapt_lab'  # Replace with your actual path
-# run_subject_data_processor(base_folder) # Run the subject data processor
-
-#base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab"
-#run_subject_data_processor(base_folder)
