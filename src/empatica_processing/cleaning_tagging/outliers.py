@@ -25,6 +25,7 @@ class OutliersDataProcessor:
         self.keywords = ['ACC', 'BVP', 'EDA', 'HR', 'TEMP']
         self.additional_files = ['info.txt', 'tags.csv']
         self.outlier_info = []
+        print("Please wait a moment while the outliers will be winsorized and the time tags will be added in a new column...")
 
     def filter_out_csv(self, df):
         """
@@ -67,7 +68,7 @@ class OutliersDataProcessor:
         # Save the SD information to a CSV file
         sd_df.reset_index(drop=True, inplace=True)
         sd_df.to_csv(sd_file_path, index=False, header=True)
-        print(f"SD file saved as {sd_file_path}")
+        #print(f"SD file saved as {sd_file_path}")
 
     def winsorize_data(self, df, lower_bounds, upper_bounds):
         """
@@ -127,7 +128,8 @@ class OutliersDataProcessor:
             clean_participant_folder (Path): The folder to save the cleaned data.
         """
         file_name = file_path.name
-        print(f"Processing file: {file_name} for participant: {participant_folder.name}")
+        #print(f"Processing...")
+        #print(f"Processing file: {file_name} for participant: {participant_folder.name}")
         df = pd.read_csv(file_path, header=None)
         first_row = df.iloc[:1]
         second_row = df.iloc[1:2]
@@ -180,7 +182,7 @@ class OutliersDataProcessor:
         final_df = pd.concat([first_row, second_row, data_rows], ignore_index=True)
         clean_file_path = clean_participant_folder / f"c_{file_name}"
         final_df.to_csv(clean_file_path, index=False, header=False)
-        print(f"File {file_name} has been winsorized and saved as {clean_file_path}")
+        #print(f"File {file_name} has been winsorized and saved as {clean_file_path}")
 
     def copy_additional_files(self, participant_folder, clean_participant_folder):
         """
@@ -195,7 +197,7 @@ class OutliersDataProcessor:
             additional_file_path = participant_folder / additional_file
             if additional_file_path.exists():
                 shutil.copy(additional_file_path, clean_participant_folder)
-                print(f"Copied {additional_file} to {clean_participant_folder}")
+                #print(f"Copied {additional_file} to {clean_participant_folder}")
 
     def process_individual_recordings(self):
         """
@@ -204,7 +206,7 @@ class OutliersDataProcessor:
         """
         for participant_folder in self.recordings_path.iterdir():
             if participant_folder.is_dir():
-                print(f"Processing participant: {participant_folder.name}")
+                #print(f"Processing participant: {participant_folder.name}")
                 clean_participant_folder = self.clean_recordings_path / f"c_{participant_folder.name}"
                 clean_participant_folder.mkdir(exist_ok=True)
 
@@ -218,6 +220,7 @@ class OutliersDataProcessor:
 
         # Save the collected outlier information
         self.save_outlier_info()
+        print("All individual recordings have been processed and saved to the 'clean_individual_recordings' folder.")
 
     def save_outlier_info(self):
         """
