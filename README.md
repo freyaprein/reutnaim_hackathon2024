@@ -1,5 +1,8 @@
 Empatica Processing
 =============================
+
+<img src="src/empatica_processing/static/logo.jpeg" width="150"/>
+
 Empatica Filtering: Cutting the Noise, Keeping the Heart
 
 Pre-processing pipeline for physiological signal data. Filtering outliers, handling missing data, tagging, and visualization data collected using Empatica watches.
