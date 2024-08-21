@@ -37,11 +37,10 @@ class OutliersDataProcessor:
 
         sd_df.reset_index(drop=True, inplace=True)
         sd_df.to_csv(sd_file_path, index=False, header=True)
-        #print(f"SD file saved as {sd_file_path}")
+        print(f"SD file saved as {sd_file_path}")
 
     def winsorize_data(self, df, lower_bounds, upper_bounds):
         return df.apply(lambda x: x.clip(lower=lower_bounds[x.name], upper=upper_bounds[x.name]))
-
 
     def add_tags_column(self, df, tags, sample_rate):
         tag0, tag1, tag2, tag3 = tags
@@ -115,19 +114,19 @@ class OutliersDataProcessor:
         final_df = pd.concat([first_row, second_row, data_rows], ignore_index=True)
         clean_file_path = clean_participant_folder / f"c_{file_name}"
         final_df.to_csv(clean_file_path, index=False, header=False)
-        #print(f"File {file_name} has been winsorized and saved as {clean_file_path}")
+        print(f"File {file_name} has been winsorized and saved as {clean_file_path}")
 
     def copy_additional_files(self, participant_folder, clean_participant_folder):
         for additional_file in self.additional_files:
             additional_file_path = participant_folder / additional_file
             if additional_file_path.exists():
                 shutil.copy(additional_file_path, clean_participant_folder)
-                #print(f"Copied {additional_file} to {clean_participant_folder}")
+                print(f"Copied {additional_file} to {clean_participant_folder}")
 
     def process_individual_recordings(self):
         for participant_folder in self.recordings_path.iterdir():
             if participant_folder.is_dir():
-                #print(f"Processing participant: {participant_folder.name}")
+                print(f"Processing participant: {participant_folder.name}")
                 clean_participant_folder = self.clean_recordings_path / f"c_{participant_folder.name}"
                 clean_participant_folder.mkdir(exist_ok=True)
                 
@@ -143,10 +142,10 @@ class OutliersDataProcessor:
         outlier_info_df = pd.DataFrame(self.outlier_info)
         outlier_info_file_path = self.base_folder / "outlier_info.csv"
         outlier_info_df.to_csv(outlier_info_file_path, index=False)
-        #print(f"Outlier information saved to {outlier_info_file_path}")
+        print(f"Outlier information saved to {outlier_info_file_path}")
 
 # Usage with base_folder from missing_filling 
-#base_folder = "/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/"  # Replace with your actual path
+base_folder = "/Users/freyaprein/Desktop/Hackathon 2024 Group2 /Hackathon_files_adapt_lab/"  # Replace with your actual path
 #base_folder = "/Users/shiriarnon/Documents/TAU/Courses/Year_1_(23-24)/Semester_2/Python_for_neuroscience/Hackathon/Hackathon_files_adapt_lab"
-#processor = OutliersDataProcessor(base_folder)
-#processor.process_individual_recordings()
+processor = OutliersDataProcessor(base_folder)
+processor.process_individual_recordings()
