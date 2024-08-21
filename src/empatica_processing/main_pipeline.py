@@ -23,7 +23,7 @@ def main():
         plotter.plot_participant_data()
         
         # Ask the user if they want to input another participant's name
-        choice = input("Do you want to input another participant's name? (yes/no): ").strip().lower()
+        choice = input("Do you want to input another participant's ID? (yes/no): ").strip().lower()
         if choice == 'yes':
             print("Please enter the participant ID in the form '#####': ")
         else:
