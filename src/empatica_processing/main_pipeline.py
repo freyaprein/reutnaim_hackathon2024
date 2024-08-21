@@ -1,6 +1,6 @@
 from missing_data.missing_filling import UnusualSubjectDataProcessor
 from cleaning_tagging.outliers import OutliersDataProcessor
-from visualization.vis_functions import ParticipantDataPlotter
+from visualization.vis_figures import ParticipantDataPlotter
 
 def main():
     # Prompt the user to input the base folder path
@@ -16,18 +16,19 @@ def main():
     
     # Create an instance of ParticipantDataPlotter
     plotter = ParticipantDataPlotter(base_folder)
+    plotter.plot_participant_data()
     
     # Plot participant data and allow reinputting another participant's name
-    while True:
-        plotter.plot_participant_data()
+    # while True:
+    #     plotter.plot_participant_data()
         
-        # Ask the user if they want to input another participant's name
-        choice = input("Do you want to input another participant's ID? (yes/no): ").strip().lower()
-        if choice == 'yes':
-            print("Please enter the participant ID in the form '#####': ")
-        else:
-            print("Exiting the program.")
-            break
+    #     # Ask the user if they want to input another participant's name
+    #     choice = input("Do you want to input another participant's ID? (yes/no): ").strip().lower()
+    #     if choice == 'yes':
+    #         print("Please enter the participant ID in the form '#####': ")
+    #     else:
+    #         print("Exiting the program.")
+    #         break
 
 if __name__ == "__main__":
     main()
